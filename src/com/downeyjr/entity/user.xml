@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.downeyjr.mapper.UserMapper">
+	<resultMap type="com.downeyjr.entity.User" id="userMap">
+		<id property="id" column="id" />
+		<result property="username" column="username" />
+		<result property="password" column="password" />
+	</resultMap>
+	<select id="getUserById" parameterType="int" resultMap="userMap">
+		select * from USER where id = #{id}
+	</select>
+	<select id="getUserByName" parameterType="string" resultMap="userMap">
+		select * from USER where username = #{username}
+	</select>
+
+	<!-- 获取插入后的Id -->
+	<insert id="insertMultiUser" useGeneratedKeys="true"
+		parameterType="java.util.List">
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into USER (username,password)
+		values
+		<foreach collection="list" item="user" index="index"
+			separator=",">
+			(
+			#{user.username}, #{user.password}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 测试查找数据 -->
+	<select id="getCTESTData" parameterType="Map" resultType="com.downeyjr.entity.CTest">
+		SELECT
+			ctest.CID,
+			ctest.CName,
+			<!-- IF(ctest.CID in (1,2,3,4),'yes ','no') AS CFLAG -->
+            if(ctest.CID in  #{keyList} ,'yes ','no') AS CFLAG
+		from ctest
+	</select>
+
+	<!-- 测试查找数据 -->
+	<select id="getCTESTData2" parameterType="java.util.List" resultType="com.downeyjr.entity.CTest">
+		SELECT
+			ctest.CID,
+			ctest.CName,
+            if(ctest.CID in  (
+          <foreach collection="list" item="str" index="index"
+			separator=",">
+				#{str}
+		 </foreach>)
+            ,'yes ','no') AS CFLAG
+		from ctest
+	</select>
+
+
+	<!-- 获取插入后的Id -->
+	<insert id="insertIntoBlob" parameterType="com.downeyjr.entity.Blob" >
+		INSERT INTO editor (UContent)
+		values (#{UContent})
+	</insert>
+</mapper>
